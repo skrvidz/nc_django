@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Operational Variables</title>
+</head>
+<body>
+    <h1>Operational Variables</h1>
+    <ul>
+    {% for var in variables %}
+        <li>{{ var.name }}: {{ var.value }}</li>
+    {% endfor %}
+    </ul>
+</body>
+</html>
