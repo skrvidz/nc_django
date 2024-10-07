@@ -17,8 +17,9 @@ services:
     command: >
       bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/app
-      - ./media:/app/media  
+      - ../nc_django:/app  
+      - ../nova_control/data/models:/app/data/models  
+      - ../nc_django/media:/app/media  
     ports:
       - "8000:8000"
     depends_on:
@@ -27,9 +28,12 @@ services:
       - DEBUG=1
 
   dash:
-    image: nova_control_app:v1.0
+    build:
+      context: ../nova_control 
+      dockerfile: Dockerfile
     volumes:
-      - ./media:/app/media
+      - ../nova_control/data/models:/app/data/models  
+      - ../nc_django/media:/app/media  
     ports:
       - "8050:8050"
     depends_on:
