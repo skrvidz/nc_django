@@ -13,13 +13,14 @@ services:
       - "5432:5432"
 
   web:
-    build: .
+    build:
+      context: ../nc_django
+      dockerfile: Dockerfile
     command: >
       bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - ../nc_django:/app  
-      - ../nova_control/data/models:/app/data/models  
-      - ../nc_django/media:/app/media  
+      - ../nc_django:/app
+      - ../nc_django/media:/app/media
     ports:
       - "8000:8000"
     depends_on:
@@ -27,18 +28,15 @@ services:
     environment:
       - DEBUG=1
 
-  dash:
+  flask-simulation:
     build:
-      context: ../nova_control
+      context: ../simulation_service
       dockerfile: Dockerfile
-    volumes:
-      - ../nova_control/data/models:/app/data/models  
-      - ../nc_django/media:/app/media  
     ports:
-      - "8050:8050"
-    depends_on:
-      - web
-      - flask-simulation
+      - "5000:5000"
+    environment:
+      - OPC_UA_SERVER_URL=opc.tcp://opc-ua-server:4840
+      - PYTHONUNBUFFERED=1
 
   opc-ua-server:
     build:
@@ -52,14 +50,39 @@ services:
       - SIMULATION_URL=http://flask-simulation:5000
       - PYTHONUNBUFFERED=1
 
-  flask-simulation:
+  rl-controller:
     build:
-      context: ../dsys_api
+      context: ../rl_controller
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "5001:5001"
+    volumes:
+      - ../nova_control/data/agents:/app/data/agents
+    depends_on:
+      - flask-simulation
+      - opc-ua-server
     environment:
       - OPC_UA_SERVER_URL=opc.tcp://opc-ua-server:4840
       - PYTHONUNBUFFERED=1
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+  dash:
+    build:
+      context: ../nova_control
+      dockerfile: Dockerfile
+    volumes:
+      - ../nova_control/data:/app/data
+      - ../nc_django/media:/app/media
+    ports:
+      - "8050:8050"
+    depends_on:
+      - web
+      - flask-simulation
+
 volumes:
   postgres_data:
