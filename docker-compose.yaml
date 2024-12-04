@@ -95,6 +95,9 @@ services:
     depends_on:
       - web
       - flask-simulation
+      - opc-ua-server
+      - block-simulation
+      - rl-controller
 
 volumes:
   postgres_data:
