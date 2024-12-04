@@ -50,6 +50,17 @@ services:
       - SIMULATION_URL=http://flask-simulation:5000
       - PYTHONUNBUFFERED=1
 
+  block-simulation:
+    build:
+      context: ../block_simulation
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002" 
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - web
+
   rl-controller:
     build:
       context: ../rl_controller
@@ -61,6 +72,7 @@ services:
     depends_on:
       - flask-simulation
       - opc-ua-server
+      - block-simulation
     environment:
       - OPC_UA_SERVER_URL=opc.tcp://opc-ua-server:4840
       - PYTHONUNBUFFERED=1
