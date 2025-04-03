@@ -109,7 +109,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../nova_control/api_definitions:/app/api_definitions
-      - ../nova_control/api_endpoints:/app/api_endpoints
     ports:
       - "9000:9000"
     depends_on:
